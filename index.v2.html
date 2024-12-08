@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro de Carros</title>
+    <style>
+        
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+        }
+
+        header {
+            background-color: #4CAF50;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+
+        main {
+            max-width: 900px;
+            margin: 20px auto;
+            background: white;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        form input {
+            padding: 10px;
+            width: calc(25% - 20px);
+            font-size: 14px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        form button {
+            padding: 10px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        form button:hover {
+            background-color: #45a049;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f2f2f2;
+            font-size: 16px;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        td button {
+            padding: 8px 12px;
+            font-size: 14px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            color: white;
+        }
+
+        .action-buttons button {
+            margin-right: 10px;
+        }
+
+        .action-buttons .edit {
+            background-color: #008CBA;
+        }
+
+        .action-buttons .edit:hover {
+            background-color: #007B9E;
+        }
+
+        .action-buttons .delete {
+            background-color: #f44336;
+        }
+
+        .action-buttons .delete:hover {
+            background-color: #da190b;
+        }
+
+        @media (max-width: 600px) {
+            form input {
+                width: 100%;
+            }
+
+            .action-buttons button {
+                display: block;
+                margin-bottom: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Cadastro de Carros</h1>
+    </header>
+    <main>
+        <form id="formCadastro">
+            <input type="text" id="marca" placeholder="Marca" required>
+            <input type="text" id="modelo" placeholder="Modelo" required>
+            <input type="number" id="preco" placeholder="Preço" required>
+            <input type="number" id="ano" placeholder="Ano de Fabricação" required>
+            <button type="submit">Cadastrar</button>
+        </form>
+
+        <table id="tabelaCarros">
+            <thead>
+                <tr>
+                    <th>Marca</th>
+                    <th>Modelo</th>
+                    <th>Preço</th>
+                    <th>Ano de Fabricação</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </main>
+
+    <script>
+        window.onload = function () {
+            carregarCarros();
+        };
+
+        function carregarCarros() {
+            const carros = JSON.parse(localStorage.getItem('carros')) || [];
+            const tbody = document.querySelector('tbody');
+            tbody.innerHTML = '';
+
+            carros.forEach((carro, index) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${carro.marca}</td>
+                    <td>${carro.modelo}</td>
+                    <td>R$ ${carro.preco}</td>
+                    <td>${carro.ano}</td>
+                    <td class="action-buttons">
+                        <button class="edit" onclick="editarCarro(${index})">Editar</button>
+                        <button class="delete" onclick="removerCarro(${index})">Remover</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        document.getElementById('formCadastro').onsubmit = function (event) {
+            event.preventDefault();
+
+            const marca = document.getElementById('marca').value;
+            const modelo = document.getElementById('modelo').value;
+            const preco = document.getElementById('preco').value;
+            const ano = document.getElementById('ano').value;
+
+            if (marca && modelo && preco && ano) {
+                const carro = { marca, modelo, preco, ano };
+                const carros = JSON.parse(localStorage.getItem('carros')) || [];
+                carros.push(carro);
+                localStorage.setItem('carros', JSON.stringify(carros));
+
+                carregarCarros();
+
+                document.getElementById('formCadastro').reset();
+            } else {
+                alert('Por favor, preencha todos os campos.');
+            }
+        };
+
+        function removerCarro(index) {
+            const carros = JSON.parse(localStorage.getItem('carros')) || [];
+            carros.splice(index, 1);
+            localStorage.setItem('carros', JSON.stringify(carros));
+
+            carregarCarros();
+        }
+
+        function editarCarro(index) {
+            const carros = JSON.parse(localStorage.getItem('carros')) || [];
+            const carro = carros[index];
+
+            document.getElementById('marca').value = carro.marca;
+            document.getElementById('modelo').value = carro.modelo;
+            document.getElementById('preco').value = carro.preco;
+            document.getElementById('ano').value = carro.ano;
+
+            carros.splice(index, 1);
+            localStorage.setItem('carros', JSON.stringify(carros));
+
+            carregarCarros();
+        }
+    </script>
+</body>
+</html>
